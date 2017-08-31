@@ -1,0 +1,57 @@
+Nexus 5000#configure terminal
+
+!--- Configures an ERSPAN source session
+
+Nexus 5000(config)#monitor session 3 type erspan-source
+
+!--- Configure the sources and traffic direction
+
+Nexus 5000(config-erspan-src)#source interface Ethernet1/10 both
+
+!--- Configure the destination IP address in the ERSPAN session
+
+Nexus 5000(config-erspan-src)#destination ip 10.23.21.8
+
+!--- Configure the ERSPAN ID
+
+Nexus 5000(config-erspan-src)#erspan-id 903
+
+!--- Configure the VRF
+
+Nexus 5000(config-erspan-src)#vrf default
+
+!--- Enable the ERSPAN source session (by default the session is in shutdown state)
+
+Nexus 5000(config-erspan-src)#no shut
+Nexus 5000(config-erspan-src)#exit
+
+
+!--- Configure the ERSPAN global origin IP address
+
+Nexus 5000(config)#monitor erspan origin ip-address 10.254.254.30 global
+
+
+
+!--- Configure the IP address for loopback interface, which is used as source of the ERSPAN traffic
+
+Nexus 5000(config)#interface loopback1
+Nexus 5000(config-if)#ip address 10.254.254.30/32
+Nexus 5000(config-if)#exit
+
+Nexus 5000(config)#interface Ethernet1/1
+Nexus 5000(config-if)#switchport
+Nexus 5000(config-if)#switchport mode trunk
+Nexus 5000(config-if)#no shutdown
+
+Nexus 5000(config)#feature interface-vlan
+Nexus 5000(config)#interface Vlan 12
+Nexus 5000(config-if)#ip address 10.23.21.7/29
+Nexus 5000(config-if)#no ip redirects
+Nexus 5000(config-if)#no shutdown
+Nexus 5000(config-if)#exit
+
+
+!--- Save the configurations in the device.
+
+switch(config)#copy running-config startup-config
+Switch(config)#exit
