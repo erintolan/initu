@@ -1,0 +1,87 @@
+To minimize the chance of drops, set the ERSPAN MTU as high as possible. On the Cisco Nexus 1000V, change the default MTU of 1500 to the current max of 9000. In addition, consider turning off TCP segmentation offloading on the operating systems involved in forwarded communication.
+
+
+
+
+Configuring ERSPAN with the Nexus 1000V
+
+
+To configure ERSPAN on an ExtraHop appliance, complete the following steps.
+1. Log in to the Admin UI (https://<extrahop_ip>/admin). 
+2. Go to the Network Settings section and click Connectivity. 
+3. In the Interfaces section click Interface 1. 
+4. On the Network Settings for Interface 1 page, click the Interface Mode drop-down list and select Management Port + RPCAP/ERSPAN Target. 
+5. Complete the remaining fields and click Save. 
+6. Depending on your configuration, set or disable the remaining interfaces. 
+
+Note: For more information about setting up the network interfaces, refer to the Connectivity section of the ExtraHop Admin UI Guide. 
+
+7. Log in to your virtual supervisor module (VSM). Run the following command to display the virtual Ethernet hosts: 
+Switch# Show int virt
+
+8. Enter config mode. 
+Switch# config terminal
+
+9. Create new monitor (port mirroring) session 
+switch(config)# monitor session 1 type erspan-source
+
+10. Enter the ExtraHop ERSPAN target IP. 
+switch(config-erspan-src)# destination ip 10.10.247.93
+
+11. Set an ERSPAN ID. 
+switch(config-erspan-src)# erspan-id 1
+
+12. Set the MTU to 9000. 
+switch(config-erspan-src)# mtu 9000
+
+Note: To minimize the chance of drops, set the ERSPAN MTU as high as possible. On the Cisco Nexus 1000V, change the default MTU of 1500 to the current max of 9000. In addition, consider turning off TCP segmentation offloading on the operating systems involved in forwarded communication. 
+
+13. Add data sources. 
+◦The following example shows data being taken from a guest.switch(config-erspan-src)# source interface vethernet 3-5 both
+
+In this example, both means the VM is both sending and receiving data.
+
+◦The following example shows data being taken from all traffic received by the VLAN.switch(config-erspan-src)# source vlan 1010 rx
+
+
+14. Enable the monitoring session. 
+switch(config-erspan-src)# no shut
+
+15. Exit from ERSPAN source to config mode. 
+switch(config-erspan-src)# exit
+
+16. Exit config mode to the enable prompt 
+switch(config)# exit
+
+17. Save your changes. 
+switch# copy running-config startup-config
+
+18. Check the settings. 
+switch# show monitor session 1
+
+A functioning monitoring session will look similar to this example.
+session 1
+---------------
+type : erspan-source
+state : up
+source intf :
+rx : Veth3 Veth4 Veth5
+    tx : Veth3 Veth4 Veth5
+	both : Veth3 Veth4 Veth5
+source VLANs :
+	rx : 1010
+	tx :
+	both :
+source port-profile :
+	rx :
+	tx :
+	both :
+filter VLANs : filter not specified
+destination IP : 10.10.247.93
+ERSPAN ID : 1
+ERSPAN TTL : 64
+ERSPAN IP Prec. : 0
+ERSPAN DSCP : 0
+ERSPAN MTU : 9000
+ERSPAN Header Type: 2
+
